@@ -324,43 +324,7 @@
     Function Dictionary( )
         Set Dictionary = CreateObject("Scripting.Dictionary")
     End Function
-' Entity functions
-    ' Converts an Entity to a JSONobject.
-    ' @param {object} Entity
-    ' @return {JSONobject}
-    Public Function JSON_Convert( Entity )
-        Set JSON_Convert = Entity.ToJSON()
-    End Function
-    ' Converts a JSON string to an Entity.
-    ' @param {string} JSON
-    ' @return {object} Entity
-    Public Function JSON_Parse( JSON )
-        Dim Result
-
-        On Error Resume Next
-            Set Result = eval("new " & DB_Class)
-            Result.FromString(Entity)
-        On Error Goto 0
-
-        set JSON_Parse = Result
-    End Function
-    ' Converts an Entity to a JSON string.
-    ' @param {object} Entity
-    ' @return {string}
-    Public Function JSON_Stringify( Entity )
-        JSON_Stringify = Entity.ToString()
-    End Function
 ' General use functions
-    Function AsNumeric(Value)
-        AsNumeric = Replace( _
-            Replace( _
-                Trim(Value), _
-            ".", ""), _
-        ",", ".")
-    End Function
-    Function Coalesce(Value, Default_)
-        SetVar Coalesce, IIF(IsVoid(Value), Default_, Value)
-    End Function
     ' Functional-equivalent of ternary operator.
     '
     ' @param {bool} Condition
@@ -374,39 +338,4 @@
             SetVar IIF, InvalidReturn
         end if
     End Function
-    ' Handy syntax-sugar to set a variable the same way for scalar and object
-    ' values.
-    ' @param {mixed} Variable
-    ' @param {mixed} Value
-    Sub SetVar(ByRef Variable, Value)
-        if IsObject(Value) then
-            set Variable = Value
-        else
-            Variable = Value
-        end if
-    End Sub
-    Function ToDouble( Value )
-        if IsNumeric(Value) then
-            ToDouble = CDbl(Value)
-        else
-            ToDouble = 0
-        end if
-    End Function
-    function ZeroFill(Value, Length)
-        Dim ValueLength
-        Dim FillLength
-
-        if IsVoid(Value) then
-            Value = ""
-        end if
-
-        ValueLength = LEN(CStr(Value))
-        FillLength = Length - ValueLength
-
-        if FillLength > 0 then
-            ZeroFill = Replace(Space(FillLength), " ", "0") & Value
-        else
-            ZeroFill = Value
-        end if
-    end function
 %>

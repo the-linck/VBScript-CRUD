@@ -1,3 +1,4 @@
+<% ' Core VBScript-CRUD edition is supposed to be placed along VBScript-Reflect %>
 <!--#include file="../VBScript-Reflect/_Entity.asp"-->
 <%
 ' Crud Interface
