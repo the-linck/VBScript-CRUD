@@ -198,11 +198,11 @@ Class DB_Statement
 
 
     ' Public interface
-        ' If automatic type detection will mark VBScript strings as UTF8.
+        ' If UTF8 charset must be used to deal with strings.
         '
         ' @var {bool}
         Public UseUTF
-        ' If built SQL Statements are Prepared Statements.
+        ' If built SQL Statements are set as a Prepared Statements.
         '
         ' @var {bool}
         Public PrepareCommands
