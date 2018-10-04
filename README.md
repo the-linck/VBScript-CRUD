@@ -16,13 +16,13 @@ Also, as VBScript-Reflect, this library optionaly depends on [ASPJson](https://g
 There are 6 code files on the project - but just 2 you need to care about.
 
 * **Database.asp**  
-    Main database class, wich encapsulates the access to the Connection, the SQL logic and Data to Entities conversion.  
+    Main database structure, wich encapsulates the access to the Connection, the SQL logic and Data to Entities conversion.  
     Already includes the files needed to work and provides a default instance named *DB_Instance*.
 * **ADOConstants.asp**  
     All constants used by ADODB to configurate database access.
 * **Functions.asp**  
     Functions used by the library and made avaliable to the user. Some aditional utilitary functions are provided too.
-* **Conditions.asp**  
+* **[Conditions.asp](docs/Conditions.md)**  
     Encapsulates conditions for Where and Join clauses.
 * [**Statement.asp**](docs/Statement.md)  
     Encapsulates the clauses of SQL logic, letting you build statements with commands in any order and have a standard SQL output.
@@ -37,13 +37,13 @@ This allows a very flexible use of the library, letting you make statements in a
 
 
 As said before, this resource is the base of the Database access through Entities, because it really makes thing quite more straightfoward.
-Deconstructed SQL functionality is provided by instances of the **Statement** class, wich has [it's own documentation](docs/Statement.md).
+Deconstructed SQL functionality is provided by instances of the **Statement** structure, wich has [it's own documentation](docs/Statement.md).
 
 
 
 # DB_Entity: the upgraded _Entity.asp include
 
-This file is meant to be included in your ASP Classes along with VBScript-Reflect's _Entity.asp, to extend it's capabilities providing bidirectional encapsulated access for the Database class to the Entity fields, properties and methods - in short, the CRUD interface.
+This file is meant to be included in your ASP Classes along with VBScript-Reflect's _Entity.asp, to extend it's capabilities providing bidirectional encapsulated access for the Database structure to the Entity fields, properties and methods - in short, the CRUD interface.
 
 There's also two new methods for the optional JSON export freature - wich obviousy depends on ASPJson library.
 
@@ -98,7 +98,7 @@ If you want to setup default values for the Entity, just add an *Instance_Initia
 
 To go a step further, you can specify Foreign Entities on your entity. Those are  a direct derivation of foreign key relationship, that makes VBScript-CRUD automatically load on to a Entity all other entites marked as linked to them.
 
-To enable this freature, a Dictionary must be stored on the *Foreign* static field. This dictionary's keys keep the fields of the Entity thar will be used to store other entites, and the dictionary's keep the class-name of this entities.
+To enable this freature, a Dictionary must be stored on the *Foreign* static field. This dictionary's keys keep the fields of the Entity that will be used to store other entites, and the dictionary's values keep the class-name of this entities.
 
 An example do clarify things:
 

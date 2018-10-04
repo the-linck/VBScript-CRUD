@@ -1,4 +1,4 @@
-# VBScript-CRUD
+# [VBScript-CRUD](../README.md)
 ## DB_Entity include
 
 The following properties and methods are provided by DB_Entity:
@@ -59,7 +59,7 @@ End Class
 
 ### Foreign Entities
 
-To enable Foreign Entities, a Dictionary must be stored on the *Foreign* static field. This dictionary's keys keep the fields of the Entity thar will be used to store other entites, and the dictionary's keep the class-name of this entities.
+To enable Foreign Entities, a Dictionary must be stored on the *Foreign* static field. This dictionary's keys keep the fields of the Entity that will be used to store other entites, and the dictionary's values keep the class-name of this entities.
 
 
 ```ASP

@@ -1,7 +1,7 @@
-# VBScript-CRUD
-## Statement Class
+# [VBScript-CRUD](../README.md)
+## Statement Structure
 
-The *Statement* class provides Deconstructed SQL functionality through the following public properties and methods:
+The *Statement* structure provides Deconstructed SQL functionality through the following public properties and methods:
 
 * *bool* **UseUTF**  
     If UTF8 charset must be used to deal with strings.

@@ -9,7 +9,7 @@ Class DB_Condition
         Public Operator
         ' Field to check value(s) or simple fixed condition.
         ' Wich one of this two depends on the presence of
-        ' $Values in this object.
+        ' $Values in this struct.
         '
         ' @var {string}
         Public Field
@@ -24,7 +24,7 @@ Class DB_Condition
     ' Real optional Constructor
         ' @param {string} Operator_
         ' @param {string} Field_
-        ' @param {string|array} Values_
+        ' @param {mixed} Values_
         ' @return {self}
         Public Default Function Construct( Operator_, Field_, Values_ )
             Operator = Operator_
@@ -40,15 +40,15 @@ End Class
 ' Multi-condition structure for JOIN clauses.
 Class DB_JoinClause
     ' Public interface
-        ' Basic Condition.
+        ' Basic DB_Condition container.
         '
         ' @var {Dictionary<int, Condition>}
         Public Conditions
-        ' Local operator to insert before this join in a join-list.
+        ' Join operator to insert before this join in a join-list.
         '
         ' @var {string}
         Public JoinType
-        ' Table.
+        ' Table to join.
         '
         ' @var {string}
         Public Table
@@ -62,7 +62,7 @@ Class DB_JoinClause
 
 
 
-    ' Real optional Constructor
+    ' Real optional Constructor.
         ' @param {string} JoinType_
         ' @param {string} Table_
         ' @return {self}

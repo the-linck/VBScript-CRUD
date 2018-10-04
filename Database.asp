@@ -158,8 +158,12 @@ Class DataBase
             Dim Current
             Dim Loaded
             Dim Result
+            Dim PreviousFlag
 
             Dim EntityClass : Set EntityClass = Entity.Self
+            PreviousFlag = EntityClass.Field("Skip_Initializer")
+            ' Not calling the initializer on the class for performance
+            EntityClass.Field("Skip_Initializer") = true
 
             if not Recordset.EOF then
                 Dim Append
@@ -248,6 +252,8 @@ Class DataBase
             else
                 Result = Array()
             end if
+
+            EntityClass.Field("Skip_Initializer") = PreviousFlag
 
             ParseEntities = Result
         End Function
