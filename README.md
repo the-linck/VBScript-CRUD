@@ -24,81 +24,20 @@ There are 6 code files on the project - but just 2 you need to care about.
     Functions used by the library and made avaliable to the user. Some aditional utilitary functions are provided too.
 * **Conditions.asp**  
     Encapsulates conditions for Where and Join clauses.
-* **Statement.asp**  
+* [**Statement.asp**](docs/Statement.md)  
     Encapsulates the clauses of SQL logic, letting you build statements with commands in any order and have a standard SQL output.
-* **DB_Entity.asp**  
+* [**DB_Entity.asp**](docs/DB_Entity.md)  
     Extends VBScript-Reflect's *_Entity.asp*, adding properties and methods used to operante in database with Entities.
 
 # Deconstructed SQL
 
-A great resource of this library, that not only comes along OO Database but also provides it, is Deconstructed SQL: being able to use SQL clauses without having to care about their order and not needing to provide them in a single sentence.  
+A great resource of this library, that not only comes along OO Database but also provides it, is Deconstructed SQL: being able to use SQL clauses without having to care about their order and not needing to provide them in a single sentence.
+
 This allows a very flexible use of the library, letting you make statements in any way you want - ending with Command objects feeded with standard and valid SQL and already parametized to prevent SQL Injection.
 
+
 As said before, this resource is the base of the Database access through Entities, because it really makes thing quite more straightfoward.
-
-### Statement class
-
-The *Statement* class provides Deconstructed SQL functionality by the following public properties and methods:
-
-* *bool* **UseUTF**  
-    If UTF8 charset must be used to deal with strings.
-* *bool* **PrepareCommands**  
-    If built SQL Statements are set as Prepared Statements.
-* *self* **Clear**  
-    Removes all caluses from this statement.
-* Table-related clauses
-    * *self* **From_Clause**(*string* Table)  
-        Set the table for Select/Delete statements.
-    * *self* **Into_Clause**(*string* Table)  
-        Set the table for Insert statements.
-    * *self* **Update_Clause**(*string* Table)  
-        Set the table for Update statements.
-* Join-related clauses
-    * *self* **Join_Clause**(*string* JoinType, *string* Table, *string|array|Dictionary|DB_Condition* Conditions, *string* Operator)  
-        Adds a JOIN clause of $JoinType for $Table, with $Conditions, using $Operator for them.
-* Field-related clauses
-    * *self* **Select_Clause**(*string|Array|Dictionary* Fields)  
-        Stores the given $Fields in the fieldlist for Select statements.  
-        To provide alisases, pass a dictionary in $Fields.
-    * *self* **Set_Clause**(*string|Array|Dictionary* Fields)  
-        Stores the given $Fields in the field/value list for Update statements.  
-        To provide values to the fields pass a Dictionary to $Fields or they will be set to null.
-    * *self* **Set_Field**(*string* Fields, *mixed* Value)  
-        Stores $Field and $Value in the field/value list for Update statements.
-    * *self* **Insert_Clause**(*string|Array|Dictionary* Fields)  
-        Stores the given $Fields in the field/value list for Insert Update statements.  
-        To provide values to the fields pass a Dictionary to $Fields or they will be set to null.
-    * *self* **Insert_Field**(*string* Fields, *mixed* Value)  
-        Stores $Field and $Value in the field/value list for Insert statements.
-* Condition-related clauses
-    * *self* **Where_Clause**(*string|array|Dictionary|DB_Condition* Conditions, *string* Operator)  
-        Adds conditions on WHERE clause, using $Operator for them.
-    * *self* **Where_In**(*string* Field, *string|array* Values, *string* Operator)  
-        Adds a condition on WHERE clause to check if $Field is equal/in $Values, using $Operator for this condition.
-* Order-related clauses
-    * *self* **Order_Clause**(*string|array<string>* Fields, *string* Order)  
-        Adds fields to ORDER BY clause.
-* Group-related clauses
-    * *self* **Group_Clause**(*string|array<string>* Fields)  
-        Adds fields to GROUP BY clause.
-* SQL Statement Assemble  
-    Where the magic happens
-    * *ADODB.Command* **Build_Insert**()  
-        Assembles the clauses from this statement in an INSERT statement.  
-        *After assembling the SQL, this DB_Statemet object is cleared.*
-    * *ADODB.Command* **Build_Select**()  
-        Assembles the clauses from this statement in an SELECT statement.  
-        *After assembling the SQL, this DB_Statemet object is cleared.*
-    * *ADODB.Command* **Build_Update**()  
-        Assembles the clauses from this statement in an UPDATE statement.  
-        *After assembling the SQL, this DB_Statemet object is cleared.*
-    * *ADODB.Command* **Build_Delete**()  
-        Assembles the clauses from this statement in an DELETE statement.  
-        *After assembling the SQL, this DB_Statemet object is cleared.*
-
-
-As you probabily noticed, most methods return the Statement object itself, allowing you to make chained calls on the object to build a SQL statement.  
-The clauses names are not exactly equal as their SQL equivalent because some of them would collide with reserved words of the language, so they were kept standardized with sufixes.
+Deconstructed SQL functionality is provided by instances of the **Statement** class, wich has [it's own documentation](docs/Statement.md).
 
 
 
@@ -108,29 +47,94 @@ This file is meant to be included in your ASP Classes along with VBScript-Reflec
 
 There's also two new methods for the optional JSON export freature - wich obviousy depends on ASPJson library.
 
-The following properties and methods are provided by DB_Entity:
+The provided properties and methods are descripted on [DB_Entity own documentation](docs/DB_Entity.md).
 
-* Crud Interface
-    * *string* KeyField  
-        Gets the name of the field set to be used as primary key.  
-        If none is set, returns the first registered field.
-    * *int* Create()  
-        Inserts this object on it's database table.
-    * *array<self>* Read()  
-        Querys this object's database table.
-    * *int* Update()  
-        Updates this object on it's database table.
-    * *int* Delete()  
-        Deletes this object from it's database table.
-* Queryable Interface
-    * *bool* Queryable  
-        If this Entity is set to be used for queries (select statements).
-    * *self* ToNonQueryable()  
-        Marks this object to not be used for queries.
-    * *self* ToQueryable()  
-        Marks this object to be used in queries, setting all fields to empty.
-* JSON export
-    * *JSONobject* ToJSON()  
-        Exports this Entity to a JSONobject, adding all registered Foreign entities to it.
-    * *string* ToString()  
-        Exports this Entity to a JSON string, adding all registered Foreign entities to it.
+
+
+## Static_Initialize: Declaring database-table properties
+
+In addition to the new properties/methods provided for classes by the new include, you must also provide some metadata for the library know how to translate your Entites in SQL when accessing the database.
+
+The *Static_Initialize()* method, wich is optional in VBScript-Reflect, fits live a glove for this purpose. Actually **it is essential** to do this task just once without having to deal with a initialization-lock logic that is already implemented on this lib - no need to reinvent the steel here.
+
+You have to specify wich table this Entity represents on the database, also each field with name and data-type pretty much as done in VBScript-Reflect, but using ADO datatype contants (wich come shipped with this library).
+
+
+
+### Implementation Example
+
+Here's an example of how to do this on an dummy test page:
+
+```ASP
+<!--#include file="VBScript-Reflect/_Class.asp"-->
+<!--#include file="VBScript-CRUD/Database.asp"-->
+<%
+Class PostTag
+    %>
+    <!--#include file="VBScript-Reflect/_Entity.asp"-->
+    <!--#include file="VBScript-CRUD/DB_Entity.asp"-->
+    <%
+    Public ID
+    Public Slug
+    Public Name
+    Public Description
+
+    Sub Static_Initialize
+        Self.Fields("TableName") = "post_tags"
+
+        Self.Fields("ID") = adUnsignedInt
+        Self.Fields("Slug") = adVarWChar
+        Self.Fields("Name") = adVarWChar
+        Self.Fields("Description") = adVarWChar
+    End Sub
+
+End Class
+%>
+```
+
+If you want to setup default values for the Entity, just add an *Instance_Initialize()* method and set the fields there, so it will act as a parameter-less constructor.
+
+### Foreign Entities
+
+To go a step further, you can specify Foreign Entities on your entity. Those are  a direct derivation of foreign key relationship, that makes VBScript-CRUD automatically load on to a Entity all other entites marked as linked to them.
+
+To enable this freature, a Dictionary must be stored on the *Foreign* static field. This dictionary's keys keep the fields of the Entity thar will be used to store other entites, and the dictionary's keep the class-name of this entities.
+
+An example do clarify things:
+
+```ASP
+<%
+Class Note
+    %>
+    <!--#include file="VBScript-Reflect/_Entity.asp"-->
+    <!--#include file="VBScript-CRUD/DB_Entity.asp"-->
+    <%
+    Public ID
+    Public Created
+    Public AuthorID
+    Public Title
+    Public Content
+
+    Public Author
+
+    Sub Static_Initialize
+        Self.Fields("TableName") = "post_tags"
+
+        Self.Fields("ID") = adBigInt
+        Self.Fields("Created") = adDate
+        Self.Fields("AuthorID") = adUnsignedInt
+        Self.Fields("Title") = adVarWChar
+        Self.Fields("Content") = adLongVarWChar
+
+        Self.Fields("Foreign") = Dictionary()
+        Self.Fields("Foreign")("Author") = "User"
+    End Sub
+
+End Class
+%>
+```
+
+With the above code you declare a **Note** entity, that registers **User** class as a Foreign Entity to be read to *Author* field. Quite simple, isn't?
+
+There's no need to specify primary or foreign keys to be used in this relation - they will be automatically verified by the library, both entities must only share a common field, and this field must be the key-field of one of them.  
+If no field-name is stored on *KeyField*static field, like on the previous example, the first field registered on the class is taken as the key-field of the Entity.
