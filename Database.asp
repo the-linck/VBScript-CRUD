@@ -171,7 +171,6 @@ Class DataBase
                 Dim Duplicate
                 Dim Index
                 Dim LoadIndex
-                Dim Size
                 Dim Key
 
                 ' Initializing Entity cache on demand
@@ -183,45 +182,18 @@ Class DataBase
                 if Append then
                     Loaded = LoadedEntities(EntityClass.Name)
                     LoadIndex = UBound(Loaded)
-                    ' RecordCount already adds 1 to the sum
-                    Size = Recordset.RecordCount + LoadIndex
-                    ReDim Preserve Loaded(Size)
-
-                    Size = Recordset.RecordCount -1
                 else
                     Loaded = Array()
                     LoadIndex = -1
-                    
-                    ' Size count begins in 0
-                    Size = Recordset.RecordCount -1
-                    ReDim Loaded(Size)
                 end if
                 Index = 0
-                Result = Array()
-                ReDim Preserve Result(Size)
+                Set Result = Dictionary()
 
                 ' Key for duplicate check
                 Key = Entity.KeyField
                 Set ClassFields = Class_Loader.Members(EntityClass)
 
                 Do Until Recordset.EOF
-                    Duplicate = false
-                    If Append Then
-                        set_ Value, FixEntityField( _
-                            EntityClass.Fields(Key), Recordset(Key).Value _
-                        )
-                        For Each Current in Loaded
-                            If IsObject(Current) Then
-                                if Current(Key) = Value then
-                                    Duplicate = true
-                                    Exit For
-                                end if
-                            Else
-                                Exit For
-                            End if
-                        Next
-                    End if
-
                     If Index = 0 Then
                         set Current = Entity.ToNonQueryable()
                     Else
@@ -236,19 +208,39 @@ Class DataBase
 
                     set Result(Index) = Current
                     Index = Index + 1
-
-                    if not (Append and Duplicate) then
-                        LoadIndex = LoadIndex + 1
-                        set Loaded(LoadIndex) = Current
-                    end if
                     
                     Call Recordset.MoveNext()
                 Loop
                 Recordset.Close()
                 Set Recordset = Nothing
+                
                 ' Fiting to content
-                ReDim Preserve Loaded(LoadIndex)
+                Index = Index + LoadIndex + 1
+                ReDim Preserve Loaded(Index)
+                ' Populating Entity cache after releasing recordset
+                For Each Index in Result
+                    Duplicate = false
+                    If Append Then
+                        set_ Value, Result(Index)(Key)
+                        For Each Current in Loaded
+                            If IsObject(Current) Then
+                                if Current(Key) = Value then
+                                    Duplicate = true
+                                    Exit For
+                                end if
+                            Else
+                                Exit For
+                            End if
+                        Next
+                        
+                        if not (Append and Duplicate) then
+                            LoadIndex = LoadIndex + 1
+                            set Loaded(LoadIndex) = Current
+                        end if
+                    End if
+                Next
                 LoadedEntities(EntityClass.Name) = Loaded
+                Result = Result.Items()
             else
                 Result = Array()
             end if
