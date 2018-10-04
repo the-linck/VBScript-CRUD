@@ -1,13 +1,9 @@
-<% ' Core VBScript-CRUD edition is supposed to be placed along VBScript-Reflect %>
-<!--#include file="../VBScript-Reflect/_Entity.asp"-->
 <%
 ' Crud Interface
-    ' If this Entity is set to be used for queries.
-    ' @var {bool}
-    Public Queryable
-
-
-
+    ' Gets the name of the field set to be used as primary key.
+    ' If none is set, returns the first registered field.
+    '
+    ' @return {string}
     Public Property Get KeyField( )
         Dim Key : Key = Self.Field("KeyField")
         if IsEmpty(Key) then
@@ -44,19 +40,32 @@
 
 
 
+' Queryable Interface
+    ' If this Entity is set to be used for queries.
+    ' @var {bool}
+    Public Queryable
+
+
+
+    ' Resets this object fields to their default values.
+    '
+    ' @return {self}
     Public Function ToDefaults()
         Call Instance_Initialize()
 
         Set ToDefaults = Me
     End Function
-
+    ' Marks this object to not be used for queries.
+    '
+    ' @return {self}
     Public Function ToNonQueryable()
         Queryable = false
 
         Set ToNonQueryable = Me
     End Function
-
-    ' Clears the object, setting all fields to empty
+    ' Marks this object to be used in queries, setting all fields to empty.
+    '
+    ' @return {self}
     Public Function ToQueryable( )
         Queryable = true
 
@@ -70,6 +79,10 @@
 
 
 ' JSON export
+    ' Exports this Entity to a JSONobject, adding all registered Foreign
+    ' entities to it.
+    '
+    ' @return {JSONobject}
     Public Function ToJSON()
         Set ToJSON = Class_Loader.ToJSON(Me)
         if TypeName(Self.Field("Foreign")) = "Dictionary" then
@@ -93,6 +106,10 @@
             Next
         end if
     End Function
+    ' Exports this Entity to a JSON string, adding all registered Foreign
+    ' entities to it.
+    '
+    ' @return {JSONobject}
     Public Function ToString()
         ToString = ToJSON().Serialize()
     End Function

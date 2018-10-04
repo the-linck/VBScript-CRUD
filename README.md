@@ -102,3 +102,35 @@ The clauses names are not exactly equal as their SQL equivalent because some of 
 
 
 
+# DB_Entity: the upgraded _Entity.asp include
+
+This file is meant to be included in your ASP Classes along with VBScript-Reflect's _Entity.asp, to extend it's capabilities providing bidirectional encapsulated access for the Database class to the Entity fields, properties and methods - in short, the CRUD interface.
+
+There's also two new methods for the optional JSON export freature - wich obviousy depends on ASPJson library.
+
+The following properties and methods are provided by DB_Entity:
+
+* Crud Interface
+    * *string* KeyField  
+        Gets the name of the field set to be used as primary key.  
+        If none is set, returns the first registered field.
+    * *int* Create()  
+        Inserts this object on it's database table.
+    * *array<self>* Read()  
+        Querys this object's database table.
+    * *int* Update()  
+        Updates this object on it's database table.
+    * *int* Delete()  
+        Deletes this object from it's database table.
+* Queryable Interface
+    * *bool* Queryable  
+        If this Entity is set to be used for queries (select statements).
+    * *self* ToNonQueryable()  
+        Marks this object to not be used for queries.
+    * *self* ToQueryable()  
+        Marks this object to be used in queries, setting all fields to empty.
+* JSON export
+    * *JSONobject* ToJSON()  
+        Exports this Entity to a JSONobject, adding all registered Foreign entities to it.
+    * *string* ToString()  
+        Exports this Entity to a JSON string, adding all registered Foreign entities to it.
