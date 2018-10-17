@@ -29,7 +29,7 @@ There are 6 code files on the project - but just 2 you need to care about.
     Extends VBScript-Reflect's *_Entity.asp*, adding properties and methods used to operante in database with Entities.
 
 
-## Why not whole evertything in classes?
+## Why not evertything in classes?
 
 Notice that we use 3 files with structures (*Database*, *Statement*, and *Conditions*), that are actually plain VBScript "classes", not using *VBScript-Reflect*'s extension include or even the one we provide. But why?
 
