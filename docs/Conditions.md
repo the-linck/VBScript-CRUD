@@ -28,14 +28,14 @@ How this field will be used depends on the presence of *Values* field: if it's E
 
 Finally, when Statement recovers this struct from it's storage to build the resulting command, *Operator* field is inserted before this condition on the current condition list - if this is not the first condition of the list, of course.
 
-## DB_JoinClause
+## DB_JoinClause Structure
 
 This structure holds **n** DB_Condition instances to a join clause on Statements, allowing queries with complex join to be easily implemented.  
 As DB_Condition, you may use this struct on your code outside the lib, but this one is far more specific to SQL utilities - wich make not useful for most othe purposes. But if you wish to use it, just understand how it is used to keep the pattern.
 
 The following fields and methods are public:
 
-* *Dictionary<int, Condition>* **Conditions**  
+* *Dictionary&lt;int, Condition&gt;* **Conditions**  
     Basic DB_Condition container.
 * *string* **JoinType**  
     Join operator to insert before this join in a join-list.

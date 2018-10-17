@@ -24,7 +24,7 @@
         end if
     End Function
 
-    ' Checks is the given date-string is in ISO 8601.
+    ' Checks the given date-string is in ISO 8601.
     ' @param {string} s_input
     ' @return bool
     function isIsoDate(s_input)
@@ -312,7 +312,7 @@
         end if
     End Function
 ' Array functions
-    ' Creates an empty array with $Size elements allocated
+    ' Creates an empty array with $Size elements allocated.
     ' @param {int} Size
     ' @return Array
     Function EmptyArray( Size )
@@ -321,10 +321,12 @@
 
         EmptyArray = Result
     End Function
+    ' Creates an empty Dictionary.
+    ' @return {Scripting.Dictionary}
     Function Dictionary( )
         Set Dictionary = CreateObject("Scripting.Dictionary")
     End Function
-' General use functions
+' SQL inspired functions
     ' Functional-equivalent of ternary operator.
     '
     ' @param {bool} Condition

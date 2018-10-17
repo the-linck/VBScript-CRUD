@@ -53,17 +53,19 @@ Class DataBase
 
 
     ' Public interface
+        ' Standard ADO Connection to use.
+        '
         ' @var {ADODB.Connection}
         Public Connection
         ' If the data-type correction for MySQL must be used.
         '
         ' @var {bool}
         Public MySQL_Date_Patch
-        ' If FowardOnly recordsets must be used en queries.
+        ' If FowardOnly recordsets must be used in queries.
         ' @var {bool}
         Public UseFowardOnly
 
-        ' Removes all caluses from this statement.
+        ' Removes all clauses from this statement.
         '
         ' @return {self}
         Public Function Clear( )
@@ -73,7 +75,7 @@ Class DataBase
         End Function
         ' Creates a Recordset disconnected from database, allowing to use DB
         ' data without an active connection to it.
-        ' Uses Foward Only cursor type to maxime performance.
+        ' Uses Foward Only cursor type to maximize performance.
         '
         ' @return {ADODB.Recordset}
         Public Function ForwardOnlyRecordset( )
@@ -102,7 +104,7 @@ Class DataBase
         ' Recovers all the fields of given $Entity.
         '
         ' @param {object} Entity
-        ' @return {Dictionary}
+        ' @return {Scripting.Dictionary}
         Public Function EntityFields( Entity )
             Dim ClassFields
             Dim Field
@@ -123,7 +125,7 @@ Class DataBase
         ' Recovers the fields of given $Entity registered as keys.
         '
         ' @param {object} Entity
-        ' @return {Dictionary}
+        ' @return {Scripting.Dictionary}
         Public Function EntityKeys( Entity )
             Dim ClassFields
             Dim Field
@@ -291,8 +293,8 @@ Class DataBase
 
             Set Connect = Me
         End Function
-        ' Disconects from the database (if connected) and decrement the 
-        'connection counter.
+        ' Decrement the  connection counter, disconects from the database
+        ' (if connected) when the counter reaches 0.
         '
         ' @return {self}
         Public Function Disconnect( )
@@ -544,7 +546,7 @@ Class DataBase
 
 
     ' SQL Statement Execution
-        ' Assembles the clauses from this statement in an INSERT statement.
+        ' Assembles the clauses from current statement in an INSERT statement.
         '
         ' @return {int}
         Public Function Run_Insert( )
@@ -573,9 +575,9 @@ Class DataBase
 
             Run_Insert = Affected
         End Function
-        ' Assembles the clauses from this statement in a SELECT statement.
+        ' Assembles the clauses from current statement in a SELECT statement.
         '
-        ' @return {Recordset}
+        ' @return {ADODB.Recordset}
         Public Function Run_Select( )
             Dim Command
             Dim NewConnection : NewConnection = (ConnectionCount = 0)
@@ -607,7 +609,7 @@ Class DataBase
 
             Set Run_Select = Result
         End Function
-        ' Assembles the clauses from this statement in an UPDATE statement.
+        ' Assembles the clauses from current statement in an UPDATE statement.
         '
         ' @return {int}
         Public Function Run_Update( )
@@ -636,7 +638,7 @@ Class DataBase
 
             Run_Update = Affected
         End Function
-        ' Assembles the clauses from this statement in an DELETE statement.
+        ' Assembles the clauses from current statement in an DELETE statement.
         '
         ' @return {int}
         Public Function Run_Delete( )
@@ -669,6 +671,10 @@ Class DataBase
 
 
     ' Generic Entity CRUD
+        ' Creates $Entity's register on it's Database table.
+        '
+        ' @param {object} Entity
+        ' @return {int}
         Public Function Create( Entity )
             Call CurrentStatement _
                 .Into_Clause(Entity.Self.Field("TableName")) _
@@ -676,7 +682,7 @@ Class DataBase
 
             Create = Run_Insert()
         End Function
-        ' Read registers from $Entity's table on Databasem using $Entity to
+        ' Read registers from $Entity's table on Database using $Entity to
         ' filter records.
         '
         ' @param {object} Entity
@@ -886,7 +892,7 @@ Class DataBase
                 Next
             end if
         End Sub
-        ' Updates the $Entity's register  from it's table on Database
+        ' Updates the $Entity's register on it's Database table.
         '
         ' @param {object} Entity
         ' @return {int}
@@ -901,7 +907,7 @@ Class DataBase
 
             Update = Run_Update()
         End Function
-        ' Deletes the $Entity's register from it's table on Database
+        ' Deletes the $Entity's register from it's Database table.
         '
         ' @param {object} Entity
         ' @return {int}

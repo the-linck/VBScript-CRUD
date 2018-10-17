@@ -9,7 +9,7 @@ The following properties and methods are provided by DB_Entity:
         If none is set, returns the first registered field.
     * *int* Create()  
         Inserts this object on it's database table.
-    * *array<self>* Read()  
+    * *array&lt;self&gt;* Read()  
         Querys this object's database table.
     * *int* Update()  
         Updates this object on it's database table.

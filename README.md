@@ -14,12 +14,12 @@ Also, as VBScript-Reflect, this library optionaly depends on [ASPJson](https://g
 
 There are 6 code files on the project - but just 2 you need to care about.
 
-* **Database.asp**  
+* **[Database.asp](docs/Database.md)**  
     Main database structure, wich encapsulates the access to the Connection, the SQL logic and Data to Entities conversion.  
     Already includes the files needed to work and provides a default instance named *DB_Instance*.
-* **ADOConstants.asp**  
+* **[ADOConstants.asp](docs/ADOConstants.md)**  
     All constants used by ADODB to configurate database access.
-* **Functions.asp**  
+* **[Functions.asp](docs/Functions.md)**  
     Functions used by the library and made avaliable to the user. Some aditional utilitary functions are provided too.
 * **[Conditions.asp](docs/Conditions.md)**  
     Encapsulates conditions for Where and Join clauses.
@@ -27,6 +27,16 @@ There are 6 code files on the project - but just 2 you need to care about.
     Encapsulates the clauses of SQL logic, letting you build statements with commands in any order and have a standard SQL output.
 * [**DB_Entity.asp**](docs/DB_Entity.md)  
     Extends VBScript-Reflect's *_Entity.asp*, adding properties and methods used to operante in database with Entities.
+
+
+## Why not whole evertything in classes?
+
+Notice that we use 3 files with structures (*Database*, *Statement*, and *Conditions*), that are actually plain VBScript "classes", not using *VBScript-Reflect*'s extension include or even the one we provide. But why?
+
+Native structures, without a extension include - and it's variables, properties and methods - are obviously far faster both in compilation and execution.
+Also, this structs needn't any complex functionality, like reflection or static properties, so native implementation is all we need for the job.
+
+So keep this performance tip: **restrict the use of the *DB_Entity.asp* extension include to the classes used to access your database**.
 
 # Deconstructed SQL
 

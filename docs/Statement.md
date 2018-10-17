@@ -39,10 +39,10 @@ The *Statement* structure provides Deconstructed SQL functionality through the f
     * *self* **Where_In**(*string* Field, *string|array* Values, *string* Operator)  
         Adds a condition on WHERE clause to check if $Field is equal/in $Values, using $Operator for this condition.
 * Order-related clauses
-    * *self* **Order_Clause**(*string|array<string>* Fields, *string* Order)  
+    * *self* **Order_Clause**(*string|array&lt;string&gt;* Fields, *string* Order)  
         Adds fields to ORDER BY clause.
 * Group-related clauses
-    * *self* **Group_Clause**(*string|array<string>* Fields)  
+    * *self* **Group_Clause**(*string|array&lt;string&gt;* Fields)  
         Adds fields to GROUP BY clause.
 * SQL Statement Assemble  
     Where the magic happens
