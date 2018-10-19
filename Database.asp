@@ -12,7 +12,7 @@ Class DataBase
         Private CurrentStatement
         ' @var {Dictionary(string, Entity)}
         Private LoadedEntities
-        
+
         Private Function FixEntityField(DataType, Value)
             If IsNull(Value) Then
                 FixEntityField = Null
@@ -210,12 +210,10 @@ Class DataBase
 
                     set Result(Index) = Current
                     Index = Index + 1
-                    
+
                     Call Recordset.MoveNext()
                 Loop
-                Recordset.Close()
-                Set Recordset = Nothing
-                
+
                 ' Fiting to content
                 Index = Index + LoadIndex + 1
                 ReDim Preserve Loaded(Index)
@@ -234,7 +232,7 @@ Class DataBase
                                 Exit For
                             End if
                         Next
-                        
+
                         if not (Append and Duplicate) then
                             LoadIndex = LoadIndex + 1
                             set Loaded(LoadIndex) = Current
@@ -243,6 +241,10 @@ Class DataBase
                 Next
                 LoadedEntities(EntityClass.Name) = Loaded
                 Result = Result.Items()
+
+                if Recordset.CursorType = adOpenStatic then
+                    Call Recordset.MoveFirst()
+                end if
             else
                 Result = Array()
             end if
@@ -301,10 +303,10 @@ Class DataBase
             if ConnectionCount > 0 then
                 if ConnectionCount = 1 then
                     Call Connection.Close()
-                    
+
                     if not IsVoid(LoadedEntities) then
                         Call LoadedEntities.RemoveAll()
-                    
+
                         Set LoadedEntities = Nothing
                     end if
                 end if
@@ -313,7 +315,7 @@ Class DataBase
 
             Set Disconnect = Me
         End Function
-    
+
 
 
     ' Table-related clauses
@@ -456,7 +458,7 @@ Class DataBase
             if ValidEntity then
                 ValidEntity = not Entity is Nothing
             end if
-            
+
             if not ValidEntity then
                 Call Err.Raise( _
                     13, _
@@ -582,7 +584,7 @@ Class DataBase
             Dim Command
             Dim NewConnection : NewConnection = (ConnectionCount = 0)
             Dim Result
-            
+
             if UseFowardOnly then
                 Set Result = ForwardOnlyRecordset()
             else
@@ -724,9 +726,9 @@ Class DataBase
         End Function
         ' Reads all Foreign Entites refered by Primary.
         ' User recursive search of new Entities to load.
-        ' 
+        '
         ' @param {array<Entity>} Primary
-        ' @param {Dictionary<string, string>} Foreign 
+        ' @param {Dictionary<string, string>} Foreign
         Private Sub Read_Foreign( ByRef Primary )
             Dim PrimaryEntity   : Set PrimaryEntity   = Primary(0)
             Dim PrimaryClass    : Set PrimaryClass    = PrimaryEntity.Self
@@ -763,7 +765,7 @@ Class DataBase
                 ' Each Foreign Key
                 For Each PrimaryField in ForeignEntities
                     ' Foreign Key's 'class'
-                    Set ForeignClass = Class_Loader(ForeignEntities)
+                    Set ForeignClass = Class_Loader.Load(ForeignEntities(PrimaryField))
                     ' Foreign Entities fields
                     ' It's useless to update the Class_Loader cache inside the loop.
                     Set ForeignFields = ForeignClass.GetMembers()
@@ -771,25 +773,19 @@ Class DataBase
                     Set ForeignEntity = ForeignClass.GetInstance()
 
                     ForeignKey = ForeignEntity.KeyField
-                    
+
 
                     if IsEmpty(PrimaryKey) and IsEmpty(ForeignKey) then
-                        Call Err.Raise( _
-                            13, _
-                            "Database.Read_Foreign", _
-                            "Entities " & ForeignClass & " and " & PrimaryClass & " haven't key" _
-                        )
+                        Err.Raise 13, "Database.Read_Foreign", _
+                            "Entities " & ForeignClass.Name & " and " & PrimaryClass.Name & " haven't key"
                     end if
 
                     if not (_
                         ForeignFields.Exists(PrimaryKey) _
                         OR PrimaryFields.Exists(ForeignKey) _
                     ) then
-                        Call Err.Raise( _
-                            13, _
-                            "Database.Read_Foreign", _
-                            "Entities " & ForeignClass & " and " & PrimaryClass & " doesn't share key" _
-                        )
+                        Err.Raise 13, "Database.Read_Foreign", _
+                            "Entities " & ForeignClass.Name & " and " & PrimaryClass.Name & " doesn't share key"
                     end if
 
                     bReverse = PrimaryFields.Exists(ForeignKey)
@@ -826,13 +822,8 @@ Class DataBase
                             ReDim Preserve Foreign(ForeignIndex)
                         end if
                     else
-                        Foreign = EmptyArray(PrimaryCount)
+                        Foreign = Array()
                         ForeignIndex = -1
-                        For Each Entity in Primary
-                            ForeignIndex = ForeignIndex + 1
-                            Foreign(ForeignIndex) = Entity(Field)
-                        Next
-                        ReDim Preserve Foreign(ForeignIndex)
                     end if
 
                     if AlreadyLoaded then
@@ -872,7 +863,7 @@ Class DataBase
                             For Each Entity in Primary
                                 For Each ForeignEntity in Foreign
                                     if Entity(Field) = ForeignEntity(Field) then
-                                        set Entity(PrimaryField) = ForeignEntity
+                                        Entity(PrimaryField) = ForeignEntity
                                         Exit For
                                     end if
                                 Next
@@ -883,10 +874,14 @@ Class DataBase
 
                 ' Recursion
                 For Each PrimaryField in ForeignEntities
-                    ForeignClass = ForeignEntities(PrimaryField)
-                    if LoadedEntities.Exists(ForeignClass) then
-                        if UBound(LoadedEntities(ForeignClass)) <> -1 then
-                            Read_Foreign LoadedEntities(ForeignClass)
+                    ForeignKey   = ForeignEntities(PrimaryField)
+                    Set ForeignClass = Class_Loader(ForeignKey)
+
+                    if LoadedEntities.Exists(ForeignKey) then
+                        Foreign = LoadedEntities(ForeignKey)
+
+                        if UBound(Foreign) <> -1 and TypeName(ForeignClass.Field("Foreign")) = "Dictionary" then
+                            Read_Foreign Foreign
                         end if
                     end if
                 Next
