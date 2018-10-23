@@ -229,6 +229,7 @@ Class DataBase
                                     Exit For
                                 end if
                             Else
+                                Duplicate = true
                                 Exit For
                             End if
                         Next
