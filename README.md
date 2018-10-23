@@ -29,7 +29,7 @@ There are 6 code files on the project - but just 2 you need to care about.
     Extends VBScript-Reflect's *_Entity.asp*, adding properties and methods used to operante in database with Entities.
 
 
-## Why not whole evertything in classes?
+## Why not evertything in classes?
 
 Notice that we use 3 files with structures (*Database*, *Statement*, and *Conditions*), that are actually plain VBScript "classes", not using *VBScript-Reflect*'s extension include or even the one we provide. But why?
 
@@ -146,4 +146,4 @@ End Class
 With the above code you declare a **Note** entity, that registers **User** class as a Foreign Entity to be read to *Author* field. Quite simple, isn't?
 
 There's no need to specify primary or foreign keys to be used in this relation - they will be automatically verified by the library, both entities must only share a common field, and this field must be the key-field of one of them.  
-If no field-name is stored on *KeyField*static field, like on the previous example, the first field registered on the class is taken as the key-field of the Entity.
+If no field-name is stored on *KeyField* static field, like on the previous example, the first field registered on the class is taken as the key-field of the Entity.
