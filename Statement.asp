@@ -63,7 +63,7 @@ Class DB_Statement
         ' @param {mixed} Value
         Private Sub AppendParameter(Byref Command, Name, Value)
             Dim Parameter : Set Parameter = Command.CreateParameter(Name, , 1, , Value)
-            Call Command.Parameters.Append(FixType(Parameter))
+            Command.Parameters.Append FixType(Parameter)
         End Sub
         ' Adds $Conditions to $Command.
         '
@@ -105,16 +105,16 @@ Class DB_Statement
                                 Set Parameter = _
                                 Command.CreateParameter(Condition.Field & "_" & Index, , 1, , Condition.Values(Index))
 
-                                Call Command.Parameters.Append(FixType(Parameter))
+                                Command.Parameters.Append FixType(Parameter)
                             end if
                         Next
                         Command.CommandText = _
                             LEFT(Command.CommandText, LEN(Command.CommandText) - 1) & ")"
                     Case Else
                         Command.CommandText = Command.CommandText & " = ?"
-                        
+
                         Set Parameter = Command.CreateParameter(Condition.Field, , 1, , Condition.Values)
-                        Call Command.Parameters.Append(FixType(Parameter))
+                        Command.Parameters.Append FixType(Parameter)
                 End Select
             Next
         End Sub
@@ -134,7 +134,7 @@ Class DB_Statement
                         JoinClause.JoinType & " JOIN " & _
                         JoinClause.Table & " ON "
 
-                    Call ApplyConditions(Command, JoinClause.Conditions)
+                    ApplyConditions Command, JoinClause.Conditions
                 Next
             end if
         End Sub
@@ -145,7 +145,7 @@ Class DB_Statement
             if Clauses.Exists("{{WHERE}}") then
                 Command.CommandText = Command.CommandText & " WHERE "
 
-                Call ApplyConditions(Command, Clauses("{{WHERE}}"))
+                ApplyConditions Command, Clauses("{{WHERE}}")
             end if
         End Sub
         ' Checks the type of $Parameter.Value with VBScript's TypeName
@@ -210,7 +210,7 @@ Class DB_Statement
         '
         ' @return {self}
         Public Function Clear( )
-            Call Clauses.RemoveAll()
+            Clauses.RemoveAll()
 
             Set Clear = Me
         End Function
@@ -228,7 +228,7 @@ Class DB_Statement
 
     ' Destructor
         Sub Class_Terminate( )
-            Call Clauses.RemoveAll()
+            Clauses.RemoveAll()
             Set Clauses = Nothing
         End Sub
 
@@ -241,11 +241,9 @@ Class DB_Statement
         ' @return {self}
         Public Function From_Clause(Table)
             if not IsString(Table) then
-                Call Err.Raise( _
-                    13, _
+                Err.Raise 13, _
                     "Statement.From_Clause", _
-                    "Table name must be a string" _
-                )
+                    "Table name must be a string"
             end if
 
             Clauses("{{FROM}}") = Table
@@ -258,11 +256,9 @@ Class DB_Statement
         ' @return {self}
         Public Function Into_Clause(Table)
             if not IsString(Table) then
-                Call Err.Raise( _
-                    13, _
+                Err.Raise 13, _
                     "Statement.Into_Clause", _
-                    "Table name must be a string" _
-                )
+                    "Table name must be a string"
             end if
 
             Clauses("{{INTO}}") = Table
@@ -275,11 +271,9 @@ Class DB_Statement
         ' @return {self}
         Public Function Update_Clause(Table)
             if not IsString(Table) then
-                Call Err.Raise( _
-                    13, _
+                Err.Raise 13, _
                     "Statement.Update_Clause", _
-                    "Table name must be a string" _
-                )
+                    "Table name must be a string"
             end if
 
             Clauses("{{UPDATE}}") = Table
@@ -304,11 +298,9 @@ Class DB_Statement
             elseif IsString(Operator) then
                 Operator = UCase(Operator)
             else
-                Call Err.Raise( _
-                    13, _
+                Err.Raise 13, _
                     "Statement.Join_Clause", _
-                    "Condition operator must be a string" _
-                )
+                    "Condition operator must be a string"
             end if
 
             if IsEmpty(JoinType) or IsNull(JoinType) then
@@ -316,19 +308,15 @@ Class DB_Statement
             elseif IsString(JoinType) then
                 JoinType = UCase(JoinType)
             else
-                Call Err.Raise( _
-                    13, _
+                Err.Raise 13, _
                     "Statement.Join_Clause", _
-                    "Join type must be a string" _
-                )
+                    "Join type must be a string"
             end if
 
             if not IsString(Table) then
-                Call Err.Raise( _
-                    13, _
+                Err.Raise 13, _
                     "Statement.Join_Clause", _
-                    "Table must be a string" _
-                )
+                    "Table must be a string"
             end if
 
             Dim Condition
@@ -445,11 +433,9 @@ Class DB_Statement
             elseif IsString(Operator) then
                 Operator = UCase(Operator)
             else
-                Call Err.Raise( _
-                    13, _
+                Err.Raise 13, _
                     "Statement.Where_Clause", _
-                    "Condition operator must be a string" _
-                )
+                    "Condition operator must be a string"
             end if
 
             Dim CurrentClause : Set CurrentClause = Clause("{{WHERE}}")
@@ -498,18 +484,14 @@ Class DB_Statement
             elseif IsString(Operator) then
                 Operator = UCase(Operator)
             else
-                Call Err.Raise( _
-                    13, _
+                Err.Raise 13, _
                     "Statement.Where_In", _
-                    "Condition operator must be a string" _
-                )
+                    "Condition operator must be a string"
             end if
             if not IsString(Field) then
-                Call Err.Raise( _
-                    13, _
+                Err.Raise 13, _
                     "Statement.Where_In", _
-                    "Field name must be a string" _
-                )
+                    "Field name must be a string"
             end if
 
             Dim CurrentClause : Set CurrentClause = Clause("{{WHERE}}")
@@ -584,7 +566,7 @@ Class DB_Statement
                             else
                                 ValuesString = ValuesString & "?,"
 
-                                Call AppendParameter(Command, Key, Value)
+                                AppendParameter Command, Key, Value
                             end if
                         end if
                     Next
@@ -593,14 +575,18 @@ Class DB_Statement
                         LEFT(Command.CommandText, LEN(Command.CommandText) - 1) & _
                         LEFT(ValuesString, LEN(ValuesString) - 1) & ")"
 
-                    Call Clear()
+                    Clear()
 
                     set Build_Insert = Command
                 else
-                    Call Err.Raise(448, "No data to insert into table, missing Insert_Clause(Fields) call", "DB_Statement.Build_Insert")
+                    Err.Raise 448, _
+                    "No data to insert into table, missing Insert_Clause(Fields) call", _
+                    "DB_Statement.Build_Insert"
                 end if
             else
-                Call Err.Raise(448, "No table to insert into, missing Into_Clause(Table) call", "DB_Statement.Build_Insert")
+                Err.Raise 448, _
+                "No table to insert into, missing Into_Clause(Table) call", _
+                "DB_Statement.Build_Insert"
             end if
         End Function
         ' Assembles the clauses from this statement in a SELECT statement.
@@ -637,8 +623,8 @@ Class DB_Statement
                 end if
 
                 Command.CommandText = Command.CommandText & " FROM " & Clauses("{{FROM}}")
-                Call ApplyJoins(Command)
-                Call ApplyWhere(Command)
+                ApplyJoins Command
+                ApplyWhere Command
 
                 if Clauses.Exists("{{GROUP}}") then
                     Set CurrentClause = Clause("{{GROUP}}")
@@ -666,11 +652,13 @@ Class DB_Statement
                     Command.CommandText = LEFT(Command.CommandText, LEN(Command.CommandText) - 1)
                 end if
 
-                Call Clear()
+                Clear()
 
                 Set Build_Select = Command
             else
-                Call Err.Raise(448, "No table to select, missing From_Clause(Table) call", "DB_Statement.Build_Select")
+                Err.Raise 448, _
+                "No table to select, missing From_Clause(Table) call", _
+                "DB_Statement.Build_Select"
             end if
         End Function
         ' Assembles the clauses from this statement in an UPDATE statement.
@@ -697,23 +685,26 @@ Class DB_Statement
                             else
                                 Command.CommandText = Command.CommandText & Key & "=?,"
 
-                                Call AppendParameter(Command, Key, Value)
+                                AppendParameter Command, Key, Value
                             end if
                         end if
                     Next
 
                     Command.CommandText = LEFT(Command.CommandText, LEN(Command.CommandText) - 1)
 
-                    Call ApplyWhere(Command)
-
-                    Call Clear()
+                    ApplyWhere Command
+                    Clear()
 
                     Set Build_Update = Command
                 else
-                    Call Err.Raise(448, "No data to update table, missing Set_Clause(Fields) call", "DB_Statement.Build_Update")
+                    Err.Raise 448, _
+                    "No data to update table, missing Set_Clause(Fields) call", _
+                    "DB_Statement.Build_Update"
                 end if
             else
-                Call Err.Raise(448, "No table to update, missing Update_Clause(Table) call", "DB_Statement.Build_Update")
+                Err.Raise 448, _
+                "No table to update, missing Update_Clause(Table) call", _
+                "DB_Statement.Build_Update"
             end if
         End Function
         ' Assembles the clauses from this statement in an DELETE statement.
@@ -727,13 +718,14 @@ Class DB_Statement
                 Command.CommandText = "DELETE FROM " & Clauses("{{FROM}}")
                 Command.Prepared = PrepareCommands
 
-                Call ApplyWhere(Command)
-
-                Call Clear()
+                ApplyWhere Command
+                Clear()
 
                 Set Build_Delete = Command
             else
-                Call Err.Raise(448, "No table to delete from, missing From_Clause(Table) call", "DB_Statement.Build_Delete")
+                Err.Raise 448, _
+                "No table to delete from, missing From_Clause(Table) call", _
+                "DB_Statement.Build_Delete"
             end if
         End Function
 End Class

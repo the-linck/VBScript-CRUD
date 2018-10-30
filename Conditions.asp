@@ -74,7 +74,7 @@ Class DB_JoinClause
         End Function
     ' Destructor
         Sub Class_Terminate( )
-            Call Conditions.RemoveAll()
+            Conditions.RemoveAll()
             Set Conditions = Nothing
         End Sub
 End Class

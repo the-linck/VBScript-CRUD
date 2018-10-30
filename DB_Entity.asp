@@ -51,7 +51,7 @@
     '
     ' @return {self}
     Public Function ToDefaults()
-        Call Instance_Initialize()
+        Instance_Initialize()
 
         Set ToDefaults = Me
     End Function
@@ -78,7 +78,151 @@
 
 
 
-' JSON export
+' Import
+    ' Creates/feeds Entities with data present on given Source.
+    '
+    ' @param {Scripting.Dictionary} Source
+    ' @return {Object}
+    Public Function FromDictionary(Source)
+        Class_Loader.FromDictionary Me, Source
+
+        if TypeName(Self.Field("Foreign")) = "Dictionary" then
+            Dim Foreign : Set Foreign = Self.Field("Foreign")
+            Dim Field_
+            Dim Entity
+            Dim Index
+            Dim Key
+            Dim List
+            Dim Value
+
+            For Each Field_ in Foreign
+                set_ Value, Source(Field_)
+                if TypeName(Value) = "Dictionary" then
+                    ' Getting only first element to check whole list type
+                    For Each Key in Value
+                        Exit For
+                    Next
+
+                    if IsNumeric(Key) then ' Arrays use numeric keys
+                        List = EmptyArray(Value.Count - 1)
+                        Index = -1
+                        For Each Key in Value
+                            set Entity = Class_Loader.FromDictionary(Foreign(Field), Value(Key))
+                            if not Entity Is Nothing then
+                                Set List(Index) = Entity
+                                Index = Index + 1
+                            end if
+                        Next
+                        Redim Preserve List(Index)
+                        Field(Field_) = List
+                    else ' Entities use string keys
+                        set Entity = Class_Loader.FromDictionary(Foreign(Field), Value)
+                        if not Entity Is Nothing then
+                            Field(Field_) = Entity
+                        end if
+                    end if
+                end if
+            Next
+        end if
+
+        Set FromDictionary = Me
+    End Function
+    ' Creates/feeds Entities with data present on given Source.
+    '
+    ' @param {JSONobject|JSONarray|string} Source
+    ' @return {Object|Object[]}
+    Public Function FromJSON(Source)
+        Class_Loader.FromJSON Me, Source
+
+        if TypeName(Self.Field("Foreign")) = "Dictionary" then
+            Dim Foreign : Set Foreign = Self.Field("Foreign")
+            Dim Field_
+            Dim Entity
+
+            For Each Field_ in Foreign
+                set Entity = Class_Loader.FromJSON(Foreign(Field), Source(Field_))
+
+                if not Entity Is Nothing then
+                    Field(Field_) = Entity
+                end if
+            Next
+        end if
+
+        Set FromJSON = Me
+    End Function
+    ' Creates/feeds Entities with data present on given request Method.
+    ' Uses giver Prefix to identify fields names.
+    '
+    ' @param {string} Method [Form|Post|Querystring|Get]
+    ' @return {Object}
+    Public Function FromRequest(Method)
+        Class_Loader.FromRequest Me, Method, ""
+
+        if TypeName(Self.Field("Foreign")) = "Dictionary" then
+            Dim Foreign : Set Foreign = Self.Field("Foreign")
+            Dim Field_
+            Dim Entity
+
+            For Each Field_ in Foreign
+                set Entity = Class_Loader.FromRequest(Foreign(Field), Method, Field & ".")
+
+                if not Entity Is Nothing then
+                    Field(Field_) = Entity
+                end if
+            Next
+        end if
+
+        Set FromRequest = Me
+    End Function
+    ' Creates/feeds Entities with a JSON string present on session Key.
+    '
+    ' @param {string} Key
+    ' @return {Object}
+    Public Function FromSession(Key)
+        Class_Loader.FromSession Me, Key
+
+        Set FromSession = Me
+    End Function
+    ' Creates/feeds Entities with data present on given Source.
+    '
+    ' @param {string} Source
+    ' @return {Object}
+    Public Function FromString(Source)
+        set_ FromString, Class_Loader.FromString(Me, Source)
+    End Function
+
+
+
+' Export
+    ' Exports this Entity to a Dictionary.
+    '
+    ' @return {Scripting.Dictionary}
+    Public Property Get ToDictionary()
+        Set ToDictionary = Class_Loader.ToDictionary(Me)
+        if TypeName(Self.Field("Foreign")) = "Dictionary" then
+            Dim Foreign : Set Foreign = Self.Field("Foreign")
+            Dim Field_
+            Dim Entity
+            Dim List
+            Dim Value
+
+            For Each Field_ in Foreign
+                set_ Value, Field(Field_)
+                if IsArray(Value) then
+                    set List = CreateObject("Scripting.Dictionary")
+                    For Each Entity in Value
+                        List(List.Count) = Entity.ToDictionary()
+                    Next
+                    ToDictionary.Add Field_, List
+                elseif IsObject(Value) then
+                    if property_exists(Value, "SupportsReflection") then
+                        set List = Value.ToDictionary()
+                        ToDictionary.Add Field_, List
+                    end if
+                end if
+            Next
+        end if
+    End Property
     ' Exports this Entity to a JSONobject, adding all registered Foreign
     ' entities to it.
     '
@@ -93,15 +237,19 @@
             Dim Value
 
             For Each Field_ in Foreign
-                set_ Value, Field(Field_) 
+                set_ Value, Field(Field_)
                 if IsArray(Value) then
                     set List = new JSONarray
                     For Each Entity in Value
                         List.push Entity.ToJSON()
                     Next
                     ToJSON.Add Field_, List
-                elseif not IsEmpty(Value) then
-                    ToJSON.Add Field_, Value.ToJSON()
+                elseif TypeName(Value) = "JSONobject" or TypeName(Value) = "JSONarray" then
+                    ToJSON.Add Field_, Value
+                elseif IsObject(Value) then
+                    if property_exists(Value, "SupportsReflection") then
+                        ToJSON.Add Field_, Value.ToJSON()
+                    end if
                 end if
             Next
         end if

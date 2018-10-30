@@ -67,7 +67,7 @@ Class DataBase
         '
         ' @return {self}
         Public Function Clear( )
-            Call CurrentStatement.Clear()
+            CurrentStatement.Clear()
 
             Set Clear = Me
         End Function
@@ -195,13 +195,20 @@ Class DataBase
                 ' Key for duplicate check
                 Key = Entity.KeyField
                 Set Result = Dictionary()
-                Index = -1
+
+                ' Avoiding new object (and inloop verification)
+                set Current = Entity.ToNonQueryable()
+                For Each Field in ClassFields
+                    Current(Field) = FixEntityField( _
+                        ClassFields(Field), Recordset(Field).Value _
+                    )
+                Next
+                set Result(0) = Current
+                Recordset.MoveNext()
+
+                Index = 0
                 Do Until Recordset.EOF
-                    If Index = 0 Then
-                        set Current = Entity.ToNonQueryable()
-                    Else
-                        set Current = EntityClass.GetInstance()
-                    End if
+                    set Current = EntityClass.GetInstance()
 
                     For Each Field in ClassFields
                         Current(Field) = FixEntityField( _
@@ -212,7 +219,7 @@ Class DataBase
                     Index = Index + 1
                     set Result(Index) = Current
 
-                    Call Recordset.MoveNext()
+                    Recordset.MoveNext()
                 Loop
 
                 ' Expanding to max possible size
@@ -232,19 +239,14 @@ Class DataBase
                                     Set Previous = Current
                                 end if
                             Else
-                                'ContinueLoop = false
                                 Exit For
                             End if
                         Next
 
-                        'if ContinueLoop then
-                            if not Duplicate then
-                                LoadIndex = LoadIndex + 1
-                                set Loaded(LoadIndex) = Result(Index)
-                            end if
-                        'else
-                        '    Exit For
-                        'end if
+                        if not Duplicate then
+                            LoadIndex = LoadIndex + 1
+                            set Loaded(LoadIndex) = Result(Index)
+                        end if
                     else
                         LoadIndex = LoadIndex + 1
                         set Loaded(LoadIndex) = Result(Index)
@@ -256,10 +258,11 @@ Class DataBase
                 Result = Result.Items()
 
                 if Recordset.CursorType = adOpenStatic then
-                    Call Recordset.MoveFirst()
+                    Recordset.MoveFirst()
                 end if
             else
                 Result = Array()
+                LoadedEntities(EntityClass.Name) = Array()
             end if
 
             EntityClass.Field("Skip_Initializer") = PreviousFlag
@@ -287,7 +290,7 @@ Class DataBase
             Set CurrentStatement = Nothing
 
             if not IsEmpty(LoadedEntities) then
-                Call LoadedEntities.RemoveAll()
+                LoadedEntities.RemoveAll()
 
                 Set LoadedEntities = Nothing
             end if
@@ -302,7 +305,7 @@ Class DataBase
         ' @return {self}
         Public Function Connect( )
             if ConnectionCount = 0 then
-                Call Connection.Open()
+                Connection.Open()
             end if
             ConnectionCount = ConnectionCount + 1
 
@@ -315,10 +318,10 @@ Class DataBase
         Public Function Disconnect( )
             if ConnectionCount > 0 then
                 if ConnectionCount = 1 then
-                    Call Connection.Close()
+                    Connection.Close()
 
                     if not IsVoid(LoadedEntities) then
-                        Call LoadedEntities.RemoveAll()
+                        LoadedEntities.RemoveAll()
 
                         Set LoadedEntities = Nothing
                     end if
@@ -337,7 +340,7 @@ Class DataBase
         ' @param {string} Table
         ' @return {self}
         Public Function From_Clause(Table)
-            Call CurrentStatement.From_Clause(Table)
+            CurrentStatement.From_Clause Table
 
             Set From_Clause = Me
         End Function
@@ -346,7 +349,7 @@ Class DataBase
         ' @param {string} Table
         ' @return {self}
         Public Function Into_Clause(Table)
-            Call CurrentStatement.Into_Clause(Table)
+            CurrentStatement.Into_Clause Table
 
             Set Into_Clause = Me
         End Function
@@ -355,7 +358,7 @@ Class DataBase
         ' @param {string} Table
         ' @return {self}
         Public Function Update_Clause(Table)
-            Call CurrentStatement.Update_Clause(Table)
+            CurrentStatement.Update_Clause Table
 
             Set Update_Clause = Me
         End Function
@@ -372,7 +375,7 @@ Class DataBase
         ' @param {string} Operator
         ' @return {self}
         Public Function Join_Clause(JoinType, Table, Conditions, Operator)
-            Call CurrentStatement.Join_Clause(JoinType, Table, Conditions, Operator)
+            CurrentStatement.Join_Clause JoinType, Table, Conditions, Operator
 
             Set Join_Clause = Me
         End Function
@@ -398,7 +401,7 @@ Class DataBase
         ' @param {string|Array|Dictionary} Fields
         ' @return {self}
         Public Function Select_Clause(Fields)
-            Call CurrentStatement.Select_Clause(Fields)
+            CurrentStatement.Select_Clause Fields
 
             Set Select_Clause = Me
         End Function
@@ -410,7 +413,7 @@ Class DataBase
         ' @param {string|Array|Dictionary} Fields
         ' @return {self}
         Public Function Set_Clause(Fields)
-            Call CurrentStatement.Set_Clause(Fields)
+            CurrentStatement.Set_Clause Fields
 
             Set Set_Clause = Me
         End Function
@@ -421,7 +424,7 @@ Class DataBase
         ' @param {mixed} Value
         ' @return {self}
         Public Function Set_Field(Field, Value)
-            Call CurrentStatement.Set_Field(Field, Value)
+            CurrentStatement.Set_Field Field, Value
 
             Set Set_Field = Me
         End Function
@@ -433,7 +436,7 @@ Class DataBase
         ' @param {string|Array|Dictionary} Fields
         ' @return {self}
         Public Function Insert_Clause(Fields)
-            Call CurrentStatement.Insert_Clause(Fields)
+            CurrentStatement.Insert_Clause Fields
 
             Set Insert_Clause = Me
         End Function
@@ -444,7 +447,7 @@ Class DataBase
         ' @param {mixed} Value
         ' @return {self}
         Public Function Insert_Field(Field, Value)
-            Call CurrentStatement.Insert_Field(Field, Value)
+            CurrentStatement.Insert_Field Field, Value
 
             Set Insert_Field = Me
         End Function
@@ -458,7 +461,7 @@ Class DataBase
         ' @param {string} Operator
         ' @return {self}
         Public Function Where_Clause(Conditions, Operator)
-            Call CurrentStatement.Where_Clause(Conditions, Operator)
+            CurrentStatement.Where_Clause Conditions, Operator
 
             Set Where_Clause = Me
         End Function
@@ -473,11 +476,9 @@ Class DataBase
             end if
 
             if not ValidEntity then
-                Call Err.Raise( _
-                    13, _
+                Err.Raise 13, _
                     "Statement.Where_Entity", _
-                    "Entity must be an object" _
-                )
+                    "Entity must be an object"
             end if
 
             Dim Conditions : Set Conditions = EntityKeys(Entity)
@@ -498,7 +499,7 @@ Class DataBase
         ' @param {string} Operator
         ' @return {self}
         Public Function Where_In(Field, Values, Operator)
-            Call CurrentStatement.Where_In(Field, Values, Operator)
+            CurrentStatement.Where_In Field, Values, Operator
 
             Set Where_In = Me
         End Function
@@ -512,7 +513,7 @@ Class DataBase
         ' @param {string} Order
         ' @return {self}
         Public Function Order_Clause( Fields, Order )
-            Call CurrentStatement.Order_Clause(Fields, Order)
+            CurrentStatement.Order_Clause Fields, Order
 
             Set Order_Clause = Me
         End Function
@@ -525,7 +526,7 @@ Class DataBase
         ' @param {string|array<string>} Fields
         ' @return {self}
         Public Function Group_Clause( Fields )
-            Call CurrentStatement.Group_Clause(Fields)
+            CurrentStatement.Group_Clause Fields
 
             Set Group_Clause = Me
         End Function
@@ -572,7 +573,7 @@ Class DataBase
             Set Command = CurrentStatement.Build_Insert()
 
             if NewConnection then
-                Call Connect()
+                Connect()
             end if
 
             ' Setting Command's Connection
@@ -580,12 +581,12 @@ Class DataBase
             'Response.end
             Set Command.ActiveConnection = Connection
             ' Executing statement
-            Call Command.Execute(Affected)
+            Command.Execute Affected
             ' Releasing memory
             Set Command.ActiveConnection = Nothing
 
             if NewConnection then
-                Call Disconnect()
+                Disconnect()
             end if
 
             Run_Insert = Affected
@@ -606,20 +607,20 @@ Class DataBase
 
             Set Command = CurrentStatement.Build_Select()
             if NewConnection then
-                Call Connect()
+                Connect()
             end if
 
             ' Setting Command's Connection
             'Response.Write Command.CommandText & vbcrlf
             Set Command.ActiveConnection = Connection
             ' Executing statement
-            Call Result.Open(Command)
+            Result.Open Command
             ' Releasing memory
             Set Command.ActiveConnection = Nothing
             Set Result.ActiveConnection = Nothing
 
             if NewConnection then
-                Call Disconnect()
+                Disconnect()
             end if
 
             Set Run_Select = Result
@@ -635,7 +636,7 @@ Class DataBase
             Set Command = CurrentStatement.Build_Update()
 
             if NewConnection then
-                Call Connect()
+                Connect()
             end if
 
             'Response.Write Command.CommandText & vbcrlf
@@ -643,12 +644,12 @@ Class DataBase
             ' Setting Command's Connection
             Set Command.ActiveConnection = Connection
             ' Executing statement
-            Call Command.Execute(Affected)
+            Command.Execute Affected
             ' Releasing memory
             Set Command.ActiveConnection = Nothing
 
             if NewConnection then
-                Call Disconnect()
+                Disconnect()
             end if
 
             Run_Update = Affected
@@ -662,7 +663,7 @@ Class DataBase
             Dim NewConnection : NewConnection = (ConnectionCount = 0)
 
             if NewConnection then
-                Call Connect()
+                Connect()
             end if
 
             'Response.Write "OE" & vbcrlf
@@ -671,12 +672,12 @@ Class DataBase
             ' Setting Command's Connection
             Set Command.ActiveConnection = Connection
             ' Executing statement
-            Call Command.Execute(Affected)
+            Command.Execute Affected
             ' Releasing memory
             Set Command.ActiveConnection = Nothing
 
             if NewConnection then
-                Call Disconnect()
+                Disconnect()
             end if
 
             Run_Delete = Affected
@@ -687,9 +688,9 @@ Class DataBase
 
     ' Generic Entity CRUD
         Public Function Create( Entity )
-            Call CurrentStatement _
+            CurrentStatement _
                 .Into_Clause(Entity.Self.Field("TableName")) _
-                .Insert_Clause(EntityFields(Entity))
+                .Insert_Clause EntityFields(Entity)
 
             Create = Run_Insert()
         End Function
@@ -716,7 +717,7 @@ Class DataBase
 
             NewConnection = (ConnectionCount = 0)
             if NewConnection then
-                Call Connect()
+                Connect()
             end if
 
             Result = ParseEntities(Entity, Run_Select())
@@ -726,7 +727,7 @@ Class DataBase
             end if
 
             if NewConnection then
-                Call Disconnect()
+                Disconnect()
             end if
 
             UseFowardOnly = PreviousFlag
@@ -844,10 +845,10 @@ Class DataBase
                     if AlreadyLoaded then
                         Foreign = LoadedEntities(ForeignClass.Name)
                     elseif UBound(Foreign) <> -1 then
-                        Call CurrentStatement _
+                        CurrentStatement _
                             .From_Clause(ForeignClass.Field("TableName") & " AS " & ForeignClass.Name) _
                             .Select_Clause(ForeignClass.Name & ".*") _
-                            .Where_In(Field, Foreign, "AND")
+                            .Where_In Field, Foreign, "AND"
                         set ForeignRecords = Run_Select()
                         ' Recyling variable
                         ParseEntities ForeignEntity, ForeignRecords
@@ -909,9 +910,9 @@ Class DataBase
             Dim Fields : Set Fields = EntityFields(Entity)
             Fields.Remove Entity.KeyField
 
-            Call CurrentStatement _
+            CurrentStatement _
                 .Update_Clause(Entity.Self.Field("TableName")) _
-                .Set_Clause(Fields)
+                .Set_Clause Fields
             Where_Entity Entity
 
             Update = Run_Update()
