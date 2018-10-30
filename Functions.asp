@@ -62,7 +62,7 @@
             ZeroFill(Hour(d_input), 2) & "-" &_
             ZeroFill(Minute(d_input), 2) & "Z"
     end function
-    
+
     ' Converts $Value to Date if its a valid date value.
     ' Else convert it to Null.
     '
@@ -335,9 +335,9 @@
     ' @return {mixed}
     Function IIF(Condition, ValidReturn, InvalidReturn)
         if (Condition) then
-            SetVar IIF, ValidReturn
+            set_ IIF, ValidReturn
         else
-            SetVar IIF, InvalidReturn
+            set_ IIF, InvalidReturn
         end if
     End Function
 %>
