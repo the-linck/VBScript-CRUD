@@ -132,23 +132,53 @@
     ' @param {JSONobject|JSONarray|string} Source
     ' @return {Object|Object[]}
     Public Function FromJSON(Source)
-        Class_Loader.FromJSON Me, Source
+        Dim JSON
+        if TypeName(Source) = "JSONobject" or TypeName(Source) = "JSONarray" then
+            set JSON = Source
+        else
+            set JSON = (new JSONobject).parse(Source)
+        end if
+        set_ FromJSON, Class_Loader.FromJSON(Me, JSON)
 
         if TypeName(Self.Field("Foreign")) = "Dictionary" then
-            Dim Foreign : Set Foreign = Self.Field("Foreign")
-            Dim Field_
             Dim Entity
+            Dim EntityClass
+            Dim Foreign
+            Dim Field_
+            Dim Index
+            Set Foreign = Self.Field("Foreign")
 
-            For Each Field_ in Foreign
-                set Entity = Class_Loader.FromJSON(Foreign(Field), Source(Field_))
+            Select Case TypeName(JSON)
+                ' Avoiding unecessary increase of the call stack
+                Case "JSONarray"
+                    ' Avoiding new object (and inloop verification)
+                    For Each Field_ in Foreign
+                        Set EntityClass = Class_Loader.Load(Foreign(Field_))
+                        set Entity = EntityClass.GetInstance().FromJSON(JSON(0)(Field_))
+                        if not Entity Is Nothing then
+                            FromJSON(0).Field(Field_) = Entity
+                        end if
+                    Next
 
-                if not Entity Is Nothing then
-                    Field(Field_) = Entity
-                end if
-            Next
+                    For Index = JSON.length - 1 To 1 Step -1
+                        For Each Field_ in Foreign
+                            Set EntityClass = Class_Loader.Load(Foreign(Field_))
+                            set Entity = EntityClass.GetInstance().FromJSON(JSON(Index)(Field_))
+                            if not Entity Is Nothing then
+                                FromJSON(Index).Field(Field_) = Entity
+                            end if
+                        Next
+                    Next
+                Case "JSONobject"
+                    For Each Field_ in Foreign
+                        Set EntityClass = Class_Loader.Load(Foreign(Field_))
+                        set Entity = EntityClass.GetInstance().FromJSON(JSON(Field_))
+                        if not Entity Is Nothing then
+                            Field(Field_) = Entity
+                        end if
+                    Next
+            End Select
         end if
-
-        Set FromJSON = Me
     End Function
     ' Creates/feeds Entities with data present on given request Method.
     ' Uses giver Prefix to identify fields names.
@@ -179,16 +209,14 @@
     ' @param {string} Key
     ' @return {Object}
     Public Function FromSession(Key)
-        Class_Loader.FromSession Me, Key
-
-        Set FromSession = Me
+        set_ FromSession, FromJSON(Session(Key))
     End Function
     ' Creates/feeds Entities with data present on given Source.
     '
     ' @param {string} Source
     ' @return {Object}
     Public Function FromString(Source)
-        set_ FromString, Class_Loader.FromString(Me, Source)
+        set_ FromString, FromJSON(Source)
     End Function
 
 
