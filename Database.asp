@@ -709,6 +709,17 @@ Class DataBase
             UseFowardOnly = true
 
             CurrentStatement.From_Clause Entity.Self.Field("TableName")
+            Dim Fields : Set Fields = Entity.Self.GetMembers()
+            if MySQL_Date_Patch then
+                Dim Key
+                For Each Key in Fields
+                    Select Case Fields(Key)
+                        Case adDate, adDBDate, adDBTime, adDBTimeStamp
+                            Fields.Key(Key) = "CAST(`" & Key & "` as CHAR) AS " & Key
+                    End Select
+                Next
+            end if
+            CurrentStatement.Select_Clause Fields.Keys()
             Where_Entity Entity
 
             if not IsEmpty(Entity.Self.Field("OrderField")) then
@@ -720,7 +731,8 @@ Class DataBase
                 Connect()
             end if
 
-            Result = ParseEntities(Entity, Run_Select())
+            Set Recordset = Run_Select()
+            Result = ParseEntities(Entity, Recordset)
 
             if Ubound(Result) <> -1 and TypeName(Entity.Self.Field("Foreign")) = "Dictionary" then
                 Read_Foreign Result

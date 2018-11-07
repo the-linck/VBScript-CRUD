@@ -107,7 +107,7 @@
                         List = EmptyArray(Value.Count - 1)
                         Index = -1
                         For Each Key in Value
-                            set Entity = Class_Loader.FromDictionary(Foreign(Field), Value(Key))
+                            set Entity = Class_Loader.FromDictionary(Foreign(Field_), Value(Key))
                             if not Entity Is Nothing then
                                 Set List(Index) = Entity
                                 Index = Index + 1
@@ -116,7 +116,7 @@
                         Redim Preserve List(Index)
                         Field(Field_) = List
                     else ' Entities use string keys
-                        set Entity = Class_Loader.FromDictionary(Foreign(Field), Value)
+                        set Entity = Class_Loader.FromDictionary(Foreign(Field_), Value)
                         if not Entity Is Nothing then
                             Field(Field_) = Entity
                         end if
@@ -194,7 +194,7 @@
             Dim Entity
 
             For Each Field_ in Foreign
-                set Entity = Class_Loader.FromRequest(Foreign(Field), Method, Field & ".")
+                set Entity = Class_Loader.FromRequest(Foreign(Field_), Method, Field & ".")
 
                 if not Entity Is Nothing then
                     Field(Field_) = Entity

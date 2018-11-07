@@ -340,4 +340,19 @@
             set_ IIF, InvalidReturn
         end if
     End Function
+' Utilitary functions
+    function ZeroFill(Value, Length)
+        Dim ValueLength
+        Dim FillLength
+         if IsVoid(Value) then
+            Value = ""
+        end if
+         ValueLength = LEN(CStr(Value))
+        FillLength = Length - ValueLength
+         if FillLength > 0 then
+            ZeroFill = Replace(Space(FillLength), " ", "0") & Value
+        else
+            ZeroFill = Value
+        end if
+    end function
 %>
