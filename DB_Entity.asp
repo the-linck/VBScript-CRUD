@@ -151,30 +151,38 @@
             Select Case TypeName(JSON)
                 ' Avoiding unecessary increase of the call stack
                 Case "JSONarray"
-                    ' Avoiding new object (and inloop verification)
-                    For Each Field_ in Foreign
-                        Set EntityClass = Class_Loader.Load(Foreign(Field_))
-                        set Entity = EntityClass.GetInstance().FromJSON(JSON(0)(Field_))
-                        if not Entity Is Nothing then
-                            FromJSON(0).Field(Field_) = Entity
-                        end if
-                    Next
-
-                    For Index = JSON.length - 1 To 1 Step -1
+                    if JSON.length > 0 then
+                        ' Avoiding new object (and inloop verification)
                         For Each Field_ in Foreign
                             Set EntityClass = Class_Loader.Load(Foreign(Field_))
-                            set Entity = EntityClass.GetInstance().FromJSON(JSON(Index)(Field_))
+                            set Entity = EntityClass.GetInstance().FromJSON(JSON(0)(Field_))
                             if not Entity Is Nothing then
-                                FromJSON(Index).Field(Field_) = Entity
+                                FromJSON(0).Field(Field_) = Entity
                             end if
                         Next
-                    Next
+
+                        For Index = JSON.length - 1 To 1 Step -1
+                            For Each Field_ in Foreign
+                                Set EntityClass = Class_Loader.Load(Foreign(Field_))
+                                set Entity = EntityClass.GetInstance().FromJSON(JSON(Index)(Field_))
+                                if not Entity Is Nothing then
+                                    FromJSON(Index).Field(Field_) = Entity
+                                end if
+                            Next
+                        Next
+                    end if
                 Case "JSONobject"
                     For Each Field_ in Foreign
-                        Set EntityClass = Class_Loader.Load(Foreign(Field_))
-                        set Entity = EntityClass.GetInstance().FromJSON(JSON(Field_))
-                        if not Entity Is Nothing then
-                            Field(Field_) = Entity
+                        if not IsNull(JSON(Field_)) then
+                            Set EntityClass = Class_Loader.Load(Foreign(Field_))
+                            set_ Entity, EntityClass.GetInstance().FromJSON(JSON(Field_))
+                            if IsObject(Entity) then
+                                if not Entity Is Nothing then
+                                    Field(Field_) = Entity
+                                end if
+                            elseif IsArray(Entity) then
+                                Field(Field_) = Entity
+                            end if
                         end if
                     Next
             End Select
@@ -188,13 +196,14 @@
     Public Function FromRequest(Method)
         Class_Loader.FromRequest Me, Method, ""
 
+
         if TypeName(Self.Field("Foreign")) = "Dictionary" then
             Dim Foreign : Set Foreign = Self.Field("Foreign")
             Dim Field_
             Dim Entity
 
             For Each Field_ in Foreign
-                set Entity = Class_Loader.FromRequest(Foreign(Field_), Method, Field & ".")
+                set_ Entity, Class_Loader.FromRequest(Foreign(Field_), Method, Field_ & ".")
 
                 if not Entity Is Nothing then
                     Field(Field_) = Entity
