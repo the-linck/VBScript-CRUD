@@ -165,6 +165,11 @@ Class DataBase
             ' Not calling the initializer on the class for performance
             EntityClass.Field("Skip_Initializer") = true
 
+
+            ' Initializing Entity cache on demand
+            if IsEmpty(LoadedEntities) then
+                Set LoadedEntities = Dictionary()
+            end if
             if not Recordset.EOF then
                 Dim Append
                 Dim CurrentIndex
@@ -173,11 +178,6 @@ Class DataBase
                 Dim LoadIndex
                 Dim Key
                 Dim Previous
-
-                ' Initializing Entity cache on demand
-                if IsEmpty(LoadedEntities) then
-                    Set LoadedEntities = Dictionary()
-                end if
 
 
 
